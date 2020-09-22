@@ -481,6 +481,20 @@ void SimpleViewer::updateUserInterface() {
             ImGui::SliderFloat("Min Horizon angle", &mSSAOOptions.minHorizonAngleRad, 0.0f, (float)M_PI_4);
             mSSAOOptions.upsampling = upsampling ? View::QualityLevel::HIGH : View::QualityLevel::LOW;
             mSSAOOptions.quality = (View::QualityLevel) quality;
+            if (ImGui::CollapsingHeader("Dominant Light Shadows (experimental)")) {
+                int sampleCount = mSSAOOptions.dominantLightShadow.sampleCount;
+                ImGui::Checkbox("Enabled##dls", &mSSAOOptions.dominantLightShadow.enabled);
+                ImGui::SliderFloat("Cone angle", &mSSAOOptions.dominantLightShadow.lightConeRad, 0.0f, (float)M_PI_2);
+                ImGui::SliderFloat("Start dist", &mSSAOOptions.dominantLightShadow.startTraceDistance, 0.0f, 1.0f);
+                ImGui::SliderFloat("Contact dist max", &mSSAOOptions.dominantLightShadow.contactDistanceMax, 0.0f, 100.0f);
+                ImGui::SliderFloat("Intensity##dls", &mSSAOOptions.dominantLightShadow.intensity, 0.0f, 10.0f);
+                ImGui::SliderFloat("Depth bias", &mSSAOOptions.dominantLightShadow.depthBias, 0.0f, 1.0f);
+                ImGui::SliderFloat("Depth slope bias", &mSSAOOptions.dominantLightShadow.depthSlopeBias, 0.0f, 1.0f);
+                ImGui::SliderFloat("Scale", &mSSAOOptions.dominantLightShadow.scale, 0.0f, 10.0f);
+                ImGui::SliderInt("Sample Count", &sampleCount, 1, 32);
+                ImGuiExt::DirectionWidget("Direction##dls", mSSAOOptions.dominantLightShadow.lightDirection.v);
+                mSSAOOptions.dominantLightShadow.sampleCount = sampleCount;
+            }
         }
         ImGui::Unindent();
     }

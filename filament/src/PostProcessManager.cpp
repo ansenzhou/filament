@@ -497,6 +497,25 @@ FrameGraphId<FrameGraphTexture> PostProcessManager::screenSpaceAmbientOcclusion(
                 mi->setParameter("spiralTurns", spiralTurns);
                 mi->setParameter("angleIncCosSin", float2{ std::cos(inc), std::sin(inc) });
                 mi->setParameter("invFarPlane", 1.0f / -cameraInfo.zf);
+
+                mi->setParameter("dlsConeTraceParams", float4{
+                        options.dominantLightShadow.enabled ?
+                                std::tan(options.dominantLightShadow.lightConeRad * 0.5f) : 0.0f,
+                        options.dominantLightShadow.startTraceDistance,
+                        1.0f / options.dominantLightShadow.contactDistanceMax,
+                        options.dominantLightShadow.intensity
+                });
+
+                mi->setParameter("dlsVsLightDirection",
+                        -cameraInfo.view * options.dominantLightShadow.lightDirection);
+
+                mi->setParameter("dlsDepthBias", float2{
+                        options.dominantLightShadow.depthBias,
+                        options.dominantLightShadow.depthSlopeBias
+                });
+                mi->setParameter("dlsInvZoom", 1.0f / options.dominantLightShadow.scale);
+                mi->setParameter("dlsSampleCount", uint32_t(options.dominantLightShadow.sampleCount));
+
                 mi->commit(driver);
                 mi->use(driver);
 

@@ -613,6 +613,20 @@ static void gui(filament::Engine* engine, filament::View*) {
                 ImGui::SliderFloat("Power", &params.ssaoOptions.power, 0.0f, 4.0f);
                 ImGui::SliderInt("Quality", &quality, 0, 3);
                 ImGui::Checkbox("High quality upsampling", &upsampling);
+                if (ImGui::CollapsingHeader("Dominant Light Shadows")) {
+                    int sampleCount = params.ssaoOptions.dominantLightShadow.sampleCount;
+                    ImGui::Checkbox("Enabled##dls", &params.ssaoOptions.dominantLightShadow.enabled);
+                    ImGui::SliderFloat("Cone angle", &params.ssaoOptions.dominantLightShadow.lightConeRad, 0.0f, (float)M_PI_2);
+                    ImGui::SliderFloat("Start dist", &params.ssaoOptions.dominantLightShadow.startTraceDistance, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Contact dist max", &params.ssaoOptions.dominantLightShadow.contactDistanceMax, 0.0f, 100.0f);
+                    ImGui::SliderFloat("Intensity##dls", &params.ssaoOptions.dominantLightShadow.intensity, 0.0f, 10.0f);
+                    ImGui::SliderFloat("Depth bias", &params.ssaoOptions.dominantLightShadow.depthBias, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Depth slope bias", &params.ssaoOptions.dominantLightShadow.depthSlopeBias, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Scale", &params.ssaoOptions.dominantLightShadow.scale, 0.0f, 10.0f);
+                    ImGui::SliderInt("Sample Count", &sampleCount, 1, 32);
+                    ImGuiExt::DirectionWidget("Direction##dls", params.ssaoOptions.dominantLightShadow.lightDirection.v);
+                    params.ssaoOptions.dominantLightShadow.sampleCount = sampleCount;
+                }
                 params.ssaoOptions.upsampling = upsampling ? View::QualityLevel::HIGH : View::QualityLevel::LOW;
                 params.ssaoOptions.quality = (View::QualityLevel)quality;
             }

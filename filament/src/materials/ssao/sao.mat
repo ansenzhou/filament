@@ -68,6 +68,26 @@ material {
         {
             type : int,
             name : maxLevel
+        },
+        {
+            type : float4,
+            name : dlsConeTraceParams
+        },
+        {
+            type : float3,
+            name : dlsVsLightDirection
+        },
+        {
+            type : float2,
+            name : dlsDepthBias
+        },
+        {
+            type : float,
+            name : dlsInvZoom
+        },
+        {
+            type : uint,
+            name : dlsSampleCount
         }
     ],
     variables : [
@@ -86,6 +106,7 @@ vertex {
 
 fragment {
     #include "ssaoUtils.fs"
+    #include "dominantLightShadowing.fs"
 
     const float kLog2LodRate = 3.0;
     const float kEdgeDistance = 0.0625; // this shouldn't be hardcoded
@@ -201,6 +222,34 @@ fragment {
         occlusion += w * max(0.0, vn + origin.z * materialParams.bias) / (vv + materialParams.peak2);
     }
 
+    float dominantLightShadowing(highp vec2 uv, highp vec3 origin, vec3 normal) {
+        mat4 ndcFromClipMatrix = mat4(
+            0.5,  0,    0,   0,
+            0,  0.5,    0,   0,
+            0,    0,  0.5,   0,
+            0.5, 0.5, 0.5,   1
+        );
+
+        ConeTraceSetup cone;
+        cone.startPosSS = uv;
+        cone.startPosVS = origin;
+        cone.normalVS = normal;
+        cone.viewToScreenMat = ndcFromClipMatrix * frameUniforms.clipFromViewMatrix;
+        cone.jitterOffset.x = random(gl_FragCoord.xy);
+        cone.jitterOffset.y = random(gl_FragCoord.xy + vec2(7, 13));
+        cone.depthParams = materialParams.depthParams;
+        cone.coneTraceDirVS = materialParams.dlsVsLightDirection;
+        cone.coneTraceParams = materialParams.dlsConeTraceParams;
+        cone.invZoom = materialParams.dlsInvZoom;
+        cone.depthBias = materialParams.dlsDepthBias.x;
+        cone.slopeScaledDepthBias = materialParams.dlsDepthBias.y;
+        cone.sampleCount = materialParams.dlsSampleCount;
+
+        float occlusion = coneTraceOcclusion(cone, materialParams_depth);
+        return occlusion;
+    }
+
+
     void postProcess(inout PostProcessInputs postProcess) {
         highp vec2 uv = variable_vertex.xy; // interpolated to pixel center
 
@@ -222,6 +271,10 @@ fragment {
             tapPosition = angleStep * tapPosition;
         }
         occlusion = sqrt(occlusion * materialParams.intensity);
+
+        if (materialParams.dlsConeTraceParams.x > 0) {
+            occlusion += dominantLightShadowing(uv, origin, normal);
+        }
 
         // occlusion to visibility
         float aoVisibility = pow(saturate(1.0 - occlusion), materialParams.power);

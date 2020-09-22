@@ -224,6 +224,18 @@ public:
         QualityLevel upsampling = QualityLevel::LOW; //!< affects AO buffer upsampling quality.
         bool enabled = false;    //!< enables or disables screen-space ambient occlusion
         float minHorizonAngleRad = 0.0f;  //!< min angle in radian to consider
+        struct {
+            float lightConeRad = 1.0f;
+            float startTraceDistance = 0.01f;
+            float contactDistanceMax = 1.0f;
+            float intensity = 1.0f;
+            math::float3 lightDirection{};
+            float depthBias = 0.01f;
+            float depthSlopeBias = 0.01f;
+            float scale = 1.0f;
+            uint8_t sampleCount = 4;
+            bool enabled = false;
+        } dominantLightShadow;
     };
 
     /**
