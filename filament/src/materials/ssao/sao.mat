@@ -7,6 +7,10 @@ material {
             precision: high
         },
         {
+            type : mat4,
+            name : screenFromVewMatrix
+        },
+        {
             type : float4,
             name : resolution,
             precision: high
@@ -240,19 +244,12 @@ fragment {
     }
 
     float dominantLightShadowing(highp vec2 uv, highp vec3 origin, vec3 normal) {
-        mat4 ndcFromClipMatrix = mat4(
-            0.5,  0,    0,   0,
-            0,  0.5,    0,   0,
-            0,    0,  0.5,   0,
-            0.5, 0.5, 0.5,   1
-        );
-
         ConeTraceSetup cone;
         cone.ssStartPos = uv;
         cone.vsStartPos = origin;
         cone.vsNormal = normal;
-        cone.viewToScreenMat = ndcFromClipMatrix * frameUniforms.clipFromViewMatrix;
-        cone.jitterOffset.x = random(gl_FragCoord.xy + vec2(7, 13));
+        cone.screenFromVewMatrix = materialParams.screenFromVewMatrix;
+        cone.jitterOffset.x = random(gl_FragCoord.xy + vec2(7, 13)) * 2.0 - 1.0;
         cone.jitterOffset.y = random(gl_FragCoord.xy);
         cone.depthParams = materialParams.depthParams;
         cone.vsConeDirection = materialParams.ssctVsLightDirection;

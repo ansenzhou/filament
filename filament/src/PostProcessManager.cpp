@@ -474,17 +474,29 @@ FrameGraphId<FrameGraphTexture> PostProcessManager::screenSpaceAmbientOcclusion(
                 const auto invProjection = inverse(cameraInfo.projection);
                 const float inc = (1.0f / (sampleCount - 0.5f)) * spiralTurns * f::TAU;
 
+                constexpr mat4 screenFromClipMatrix {
+                        0.5, 0.0, 0.0, 0.0,
+                        0.0, 0.5, 0.0, 0.0,
+                        0.0, 0.0, 0.5, 0.0,
+                        0.5, 0.5, 0.5, 1.0
+                };
+
                 auto& material = getPostProcessMaterial("sao");
                 FMaterialInstance* const mi = material.getMaterialInstance();
                 mi->setParameter("depth", depth, {
-                        .filterMin = SamplerMinFilter::NEAREST_MIPMAP_NEAREST
-                });
+                        .filterMin = SamplerMinFilter::NEAREST_MIPMAP_NEAREST });
+                mi->setParameter("screenFromVewMatrix",
+                        mat4f(screenFromClipMatrix * cameraInfo.projection));
                 mi->setParameter("resolution",
                         float4{ desc.width, desc.height, 1.0f / desc.width, 1.0f / desc.height });
-                mi->setParameter("invRadiusSquared", 1.0f / (options.radius * options.radius));
-                mi->setParameter("minHorizonAngleSineSquared", std::pow(std::sin(options.minHorizonAngleRad), 2.0f));
-                mi->setParameter("projectionScaleRadius", projectionScale * options.radius);
-                mi->setParameter("depthParams", cameraInfo.projection[3][2] * 0.5f);
+                mi->setParameter("invRadiusSquared",
+                        1.0f / (options.radius * options.radius));
+                mi->setParameter("minHorizonAngleSineSquared",
+                        std::pow(std::sin(options.minHorizonAngleRad), 2.0f));
+                mi->setParameter("projectionScaleRadius",
+                        projectionScale * options.radius);
+                mi->setParameter("depthParams",
+                        cameraInfo.projection[3][2] * 0.5f);
 
                 mi->setParameter("positionParams", float2{
                         invProjection[0][0], invProjection[1][1] } * 2.0f);
