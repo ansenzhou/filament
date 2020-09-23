@@ -295,6 +295,15 @@ public:
                 math::clamp(1.0f, 2.0f, options.resolution * 2.0f) + 0.5f) * 0.5f;
         options.intensity = std::max(0.0f, options.intensity);
         options.minHorizonAngleRad = math::clamp(0.0f, math::f::PI_2, options.minHorizonAngleRad);
+        options.ssct.lightConeRad = math::clamp(0.0f, math::f::PI_2, options.ssct.lightConeRad);
+        options.ssct.startTraceDistance = std::max(0.0f, options.ssct.startTraceDistance);
+        options.ssct.contactDistanceMax = std::max(0.0f, options.ssct.contactDistanceMax);
+        options.ssct.intensity = std::max(0.0f, options.ssct.intensity);
+        options.ssct.lightDirection = normalize(options.ssct.lightDirection);
+        options.ssct.depthBias = std::max(0.0f, options.ssct.depthBias);
+        options.ssct.depthSlopeBias = std::max(0.0f, options.ssct.depthSlopeBias);
+        options.ssct.scale = std::max(0.0f, options.ssct.scale);
+        options.ssct.sampleCount = std::clamp(1u, 255u, (unsigned)options.ssct.sampleCount);
         mAmbientOcclusionOptions = options;
     }
 

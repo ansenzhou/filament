@@ -211,8 +211,8 @@ public:
     };
 
     /**
-     * Options for screen space Ambient Occlusion (SSAO)
-     * @see setAmbientOcclusion()
+     * Options for screen space Ambient Occlusion (SSAO) and Screen Space Cone Tracing (SSCT)
+     * @see setAmbientOcclusionOptions()
      */
     struct AmbientOcclusionOptions {
         float radius = 0.3f;    //!< Ambient Occlusion radius in meters, between 0 and ~10.
@@ -224,18 +224,22 @@ public:
         QualityLevel upsampling = QualityLevel::LOW; //!< affects AO buffer upsampling quality.
         bool enabled = false;    //!< enables or disables screen-space ambient occlusion
         float minHorizonAngleRad = 0.0f;  //!< min angle in radian to consider
+        /**
+         * Screen Space Cone Tracing (SSCT) options
+         * Ambient shadows from dominant light
+         */
         struct {
-            float lightConeRad = 1.0f;
-            float startTraceDistance = 0.01f;
-            float contactDistanceMax = 1.0f;
-            float intensity = 1.0f;
-            math::float3 lightDirection{};
-            float depthBias = 0.01f;
-            float depthSlopeBias = 0.01f;
-            float scale = 1.0f;
-            uint8_t sampleCount = 4;
-            bool enabled = false;
-        } dominantLightShadow;
+            float lightConeRad = 1.0f;          //!< full cone angle in radian, between 0 and pi/2
+            float startTraceDistance = 0.01f;   //!< distance where tracing starts
+            float contactDistanceMax = 1.0f;    //!< max distance shadows are cast
+            float intensity = 0.8f;             //!< intensity
+            math::float3 lightDirection{ 0, -1, 0 };    //!< light direction
+            float depthBias = 0.01f;        //!< depth bias in world units (mitigate self shadowing)
+            float depthSlopeBias = 0.01f;   //!< depth slope bias (mitigate self shadowing)
+            float scale = 1.0f;             //!< cast shadows scaling
+            uint8_t sampleCount = 4;        //!< tracing sample count, between 1 and 255
+            bool enabled = false;           //!< enables or disables SSCT
+        } ssct;
     };
 
     /**

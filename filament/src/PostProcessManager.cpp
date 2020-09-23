@@ -498,23 +498,19 @@ FrameGraphId<FrameGraphTexture> PostProcessManager::screenSpaceAmbientOcclusion(
                 mi->setParameter("angleIncCosSin", float2{ std::cos(inc), std::sin(inc) });
                 mi->setParameter("invFarPlane", 1.0f / -cameraInfo.zf);
 
-                mi->setParameter("dlsConeTraceParams", float4{
-                        options.dominantLightShadow.enabled ?
-                                std::tan(options.dominantLightShadow.lightConeRad * 0.5f) : 0.0f,
-                        options.dominantLightShadow.startTraceDistance,
-                        1.0f / options.dominantLightShadow.contactDistanceMax,
-                        options.dominantLightShadow.intensity
+                mi->setParameter("ssctConeTraceParams", float4{
+                        options.ssct.enabled ? std::tan(options.ssct.lightConeRad * 0.5f) : 0.0f,
+                        options.ssct.startTraceDistance,
+                        1.0f / options.ssct.contactDistanceMax,
+                        options.ssct.intensity
                 });
 
-                mi->setParameter("dlsVsLightDirection",
-                        -cameraInfo.view * options.dominantLightShadow.lightDirection);
-
-                mi->setParameter("dlsDepthBias", float2{
-                        options.dominantLightShadow.depthBias,
-                        options.dominantLightShadow.depthSlopeBias
-                });
-                mi->setParameter("dlsInvZoom", 1.0f / options.dominantLightShadow.scale);
-                mi->setParameter("dlsSampleCount", uint32_t(options.dominantLightShadow.sampleCount));
+                mi->setParameter("ssctVsLightDirection",
+                        -cameraInfo.view * options.ssct.lightDirection);
+                mi->setParameter("ssctDepthBias",
+                        float2{ options.ssct.depthBias, options.ssct.depthSlopeBias });
+                mi->setParameter("ssctInvZoom", options.ssct.scale);
+                mi->setParameter("ssctSampleCount", uint32_t(options.ssct.sampleCount));
 
                 mi->commit(driver);
                 mi->use(driver);

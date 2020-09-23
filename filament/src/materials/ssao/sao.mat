@@ -71,23 +71,23 @@ material {
         },
         {
             type : float4,
-            name : dlsConeTraceParams
+            name : ssctConeTraceParams
         },
         {
             type : float3,
-            name : dlsVsLightDirection
+            name : ssctVsLightDirection
         },
         {
             type : float2,
-            name : dlsDepthBias
+            name : ssctDepthBias
         },
         {
             type : float,
-            name : dlsInvZoom
+            name : ssctInvZoom
         },
         {
             type : uint,
-            name : dlsSampleCount
+            name : ssctSampleCount
         }
     ],
     variables : [
@@ -255,12 +255,12 @@ fragment {
         cone.jitterOffset.x = random(gl_FragCoord.xy + vec2(7, 13));
         cone.jitterOffset.y = random(gl_FragCoord.xy);
         cone.depthParams = materialParams.depthParams;
-        cone.vsConeDirection = materialParams.dlsVsLightDirection;
-        cone.coneTraceParams = materialParams.dlsConeTraceParams;
-        cone.invZoom = materialParams.dlsInvZoom;
-        cone.depthBias = materialParams.dlsDepthBias.x;
-        cone.slopeScaledDepthBias = materialParams.dlsDepthBias.y;
-        cone.sampleCount = materialParams.dlsSampleCount;
+        cone.vsConeDirection = materialParams.ssctVsLightDirection;
+        cone.coneTraceParams = materialParams.ssctConeTraceParams;
+        cone.invZoom = materialParams.ssctInvZoom;
+        cone.depthBias = materialParams.ssctDepthBias.x;
+        cone.slopeScaledDepthBias = materialParams.ssctDepthBias.y;
+        cone.sampleCount = materialParams.ssctSampleCount;
 
         float occlusion = coneTraceOcclusion(cone, materialParams_depth);
         return occlusion;
@@ -277,11 +277,11 @@ fragment {
         float occlusion = 0.0;
 
         if (materialParams.intensity > 0.0) {
-            occlusion += scalableAmbientObscurance(uv, origin, normal);
+            occlusion = scalableAmbientObscurance(uv, origin, normal);
         }
 
-        if (materialParams.dlsConeTraceParams.x > 0.0) {
-            occlusion += dominantLightShadowing(uv, origin, normal);
+        if (materialParams.ssctConeTraceParams.x > 0.0) {
+            occlusion = max(occlusion, dominantLightShadowing(uv, origin, normal));
         }
 
         // occlusion to visibility
